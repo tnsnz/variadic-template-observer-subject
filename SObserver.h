@@ -1,26 +1,31 @@
-#pragma once
+#include <tuple>
+
+class SObserverBase
+{
+public:
+    virtual ~SObserverBase() {}
+    virtual void update() = 0;
+};
 
 template <typename... Args>
-class SObserver {
+class SObserver : public SObserverBase
+{
 public:
-	typedef void Function(Args...);
+    using FunctionType = void (*)(Args...);
+    SObserver(FunctionType func, Args... args) : func(func), storedArgs(args...) {}
 
-	SObserver(Function* func)
-	{
-		this->func = func;
-		auto kk = func;
-	}
-
-	void addFunc(Function* func)
-	{
-		this->func = func;
-	}
-
-	void update(Args... args)
-	{
-		func(args...);
-	}
+    void update() override
+    {
+        callFunc(std::index_sequence_for<Args...>());
+    }
 
 private:
-	Function* func;
+    template <std::size_t... Is>
+    void callFunc(std::index_sequence<Is...>)
+    {
+        func(std::get<Is>(storedArgs)...);
+    }
+
+    FunctionType func;
+    std::tuple<Args...> storedArgs;
 };

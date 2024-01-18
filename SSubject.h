@@ -1,28 +1,23 @@
-#pragma once
 #include "SObserver.h"
+
 #include <vector>
 
-template<typename... Args>
-class SSubject {
+class SSubject
+{
 public:
-	SSubject()
-	{
-	}
-
-	void addObserver(SObserver<Args...> *observer)
+	void addObserver(SObserverBase* observer)
 	{
 		observers.push_back(observer);
 	}
 
-	void notifyUpdate(Args... arg)
+	void notifyUpdate()
 	{
-		for (auto observer : observers)
+		for (const auto& observer : observers)
 		{
-			observer->update(arg...);
+			observer->update();
 		}
 	}
 
 private:
-	std::vector<SObserver<Args...>*> observers;
-
+	std::vector<SObserverBase*> observers;
 };
